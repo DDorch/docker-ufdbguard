@@ -1,0 +1,47 @@
+#!/bin/bash
+set -e
+
+# Configure squid
+if [ ! -f ${SQUID_CONF_DIR}/squid.conf ]
+then
+    cp ${SQUID_CONF_DIR}.origin/squid.conf ${SQUID_CONF_DIR}/squid.conf
+
+    if [ ! -z "$LOCALNET" ]
+    then
+        sed -i "s:#http_access allow localnet:http_access allow localnet:g" /etc/squid/squid.conf
+        sed -i "s:#acl localnet src 10.0.0.0/8:acl localnet src ${LOCALNET}:g" /etc/squid/squid.conf
+    fi
+
+    cat ${SQUID_CONF_DIR}.origin/squid_users.conf ${SQUID_CONF_DIR}.origin/squid_ufdbguard.conf >> ${SQUID_CONF_DIR}/squid.conf
+    touch ${SQUID_CONF_DIR}/users
+fi
+
+# Sync UT1 blacklist forked from https://flameeyes.blog/2011/05/02/ufdbguard-and-blacklists/
+rsync --delete -v --exclude 'domains.ufdb' --exclude 'security' --no-links --archive rsync://ftp.univ-tlse1.fr/blacklist/dest/ ${UFDB_BL_DIR}/
+exit=0
+
+touch /etc/ufdbguard.origin/ufdbGuard_categories.conf
+
+umask 0333
+find ${UFDB_BL_DIR} -mindepth 1 -maxdepth 1 -type d -printf '%f\n' | while read table; do
+    [ -f ${UFDB_BL_DIR}/${table}/domains ] || continue
+    myparams="-W -t $table -d ${UFDB_BL_DIR}/${table}/domains"
+    [ -f ${UFDB_BL_DIR}/urls ] && myparams="${myparams} -u ${UFDB_BL_DIR}/${table}/urls"
+    ufdbGenTable ${myparams} || exit=1
+    echo "category \"${table}\" { domainlist \"${table}/domains\" }" >> /etc/ufdbguard.origin/ufdbGuard_categories.conf
+done
+
+# Merge ufdbGuard configuration file
+if [ ! -f /etc/ufdbGuard.conf ]
+then
+    cat /etc/ufdbguard.origin/ufdbGuard_header.conf /etc/ufdbguard.origin/ufdbGuard_categories.conf /etc/ufdbguard.origin/ufdbGuard_acl.conf > /etc/ufdbGuard.conf
+fi
+
+mkdir -p ${UFDB_DIR}/logs
+chown ufdb:ufdb ${UFDB_DIR}/logs
+
+# Start service ufdbguard
+/etc/init.d/ufdbguard start
+
+# run original squid start script
+exec /sbin/entrypoint.sh
