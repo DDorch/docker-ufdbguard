@@ -4,10 +4,12 @@ set -e
 # Configure squid
 if [ ! -f ${SQUID_CONF_DIR}/squid.conf ]
 then
+    echo "Initialisation of ${SQUID_CONF_DIR}/squid.conf and ${SQUID_CONF_DIR}/users"
     cp ${SQUID_CONF_DIR}.origin/squid.conf ${SQUID_CONF_DIR}/squid.conf
 
     if [ ! -z "$LOCALNET" ]
     then
+        echo "Set localnet configuration"
         sed -i "s:#http_access allow localnet:http_access allow localnet:g" /etc/squid/squid.conf
         sed -i "s:#acl localnet src 10.0.0.0/8:acl localnet src ${LOCALNET}:g" /etc/squid/squid.conf
     fi
@@ -34,6 +36,7 @@ done
 # Merge ufdbGuard configuration file
 if [ ! -f ${UFDB_DIR}/ufdbGuard.conf ]
 then
+    echo "Initialisation of ${UFDB_DIR}/ufdbGuard.conf"
     cat /etc/ufdbguard.origin/ufdbGuard_header.conf /etc/ufdbguard.origin/ufdbGuard_categories.conf /etc/ufdbguard.origin/ufdbGuard_acl.conf > ${UFDB_DIR}/ufdbGuard.conf
 fi
 
