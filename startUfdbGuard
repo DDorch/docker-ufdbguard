@@ -32,9 +32,9 @@ find ${UFDB_BL_DIR} -mindepth 1 -maxdepth 1 -type d -printf '%f\n' | while read 
 done
 
 # Merge ufdbGuard configuration file
-if [ ! -f /etc/ufdbGuard.conf ]
+if [ ! -f ${UFDB_DIR}/ufdbGuard.conf ]
 then
-    cat /etc/ufdbguard.origin/ufdbGuard_header.conf /etc/ufdbguard.origin/ufdbGuard_categories.conf /etc/ufdbguard.origin/ufdbGuard_acl.conf > /etc/ufdbGuard.conf
+    cat /etc/ufdbguard.origin/ufdbGuard_header.conf /etc/ufdbguard.origin/ufdbGuard_categories.conf /etc/ufdbguard.origin/ufdbGuard_acl.conf > ${UFDB_DIR}/ufdbGuard.conf
 fi
 
 mkdir -p ${UFDB_DIR}/logs

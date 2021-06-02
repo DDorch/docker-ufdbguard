@@ -21,6 +21,8 @@ RUN wget https://www.urlfilterdb.com/files/downloads/ufdbguard_1.35.3-ubuntu18.0
  && rm -rf /var/lib/apt/lists/* \
  && rm ufdbguard_1.35.3-ubuntu18.04_amd64.deb
 
+RUN rm /etc/ufdbGuard.conf
+RUN ln -s ${UFDB_DIR}/ufdbGuard.conf /etc/ufdbGuarg.conf
 COPY ufdbguard /etc/ufdbguard.origin
 
 ADD startUfdbGuard /startUfdbGuard
