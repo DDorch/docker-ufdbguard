@@ -12,9 +12,11 @@ then
         echo "Set localnet configuration"
         sed -i "s:#http_access allow localnet:http_access allow localnet:g" /etc/squid/squid.conf
         sed -i "s:#acl localnet src 10.0.0.0/8:acl localnet src ${LOCALNET}:g" /etc/squid/squid.conf
+        sed -i "s:http_access deny all:# http_access deny all:g" /etc/squid/squid.conf
     fi
 
     cat ${SQUID_CONF_DIR}.origin/squid_users.conf ${SQUID_CONF_DIR}.origin/squid_ufdbguard.conf >> ${SQUID_CONF_DIR}/squid.conf
+    echo "http_access deny all" >> ${SQUID_CONF_DIR}/squid.conf
     touch ${SQUID_CONF_DIR}/users
 fi
 
