@@ -2,7 +2,7 @@
 
 ## Introduction
 
-This image is an [ufdbGuard](https://www.urlfilterdb.com/) addition to [sameersbn/docker-squid](https://github.com/sameersbn/docker-squid) which synchronizes [the French UT1 blacklist](https://dsi.ut-capitole.fr/blacklists/) at container start up.
+This image is an [ufdbGuard](https://www.urlfilterdb.com/) addition to [sameersbn/docker-squid](https://github.com/sameersbn/docker-squid) It uses [the French UT1 blacklist](https://dsi.ut-capitole.fr/blacklists/) for filtering inappropriate contents.
 
 Access restriction to the proxy can be done by IP filtering and/or username/password access.
 
@@ -48,7 +48,15 @@ And then restart the container:
 
 ```docker restart ufdbguard```
 
-## Update blacklist
+## UT1 blacklist
+
+As it is noticed on [the UT1 blacklist website](https://dsi.ut-capitole.fr/blacklists/index_en.php): *this list should not be seen as a "to be block". It must be seen as a "web categorization" : some categories can be blocked or allowed, depending on your environnement.*
+
+Each category of this list is defined in ufdbGuard configuration, taking into account domains, URLs, and expression lists.
+
+Default configuration is very restrictive (for example "shopping" is not allowed) and authorized and unauthorized categories can be modified in the file `/var/ufdbguard/ufdbGuard.conf`.
+
+### Updates
 
 The blacklist is synchronized at each startup of the container. You can, for example, use a cron command to restart the container everyday at 2:30am:
 
@@ -61,3 +69,9 @@ And add:
 ```
 30 2 * * * docker restart ufdbguard
 ```
+
+## Acknowledgment
+
+This work is first inspired from [the Muenchhausen Squidguard docker image](https://github.com/muenchhausen/docker-squidguard).
+
+Synchronisation of the UT1 blacklist and conversion to ufdbGuard database is taken from [the Flameeyes's Weblog](https://flameeyes.blog/2011/05/02/ufdbguard-and-blacklists/).
