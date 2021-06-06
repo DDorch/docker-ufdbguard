@@ -24,13 +24,16 @@ exit=0
 
 touch /etc/ufdbguard.origin/ufdbGuard_categories.conf
 
-umask 0333
 find ${UFDB_BL_DIR} -mindepth 1 -maxdepth 1 -type d -printf '%f\n' | while read table; do
-    [ -f ${UFDB_BL_DIR}/${table}/domains ] || continue
+    [ -s ${UFDB_BL_DIR}/${table}/domains ] || continue
     myparams="-W -t $table -d ${UFDB_BL_DIR}/${table}/domains"
-    [ -f ${UFDB_BL_DIR}/urls ] && myparams="${myparams} -u ${UFDB_BL_DIR}/${table}/urls"
+    [ -s ${UFDB_BL_DIR}/${table}/urls ] && myparams="${myparams} -u ${UFDB_BL_DIR}/${table}/urls"
     ufdbGenTable ${myparams} || exit=1
-    echo "category \"${table}\" { domainlist \"${table}/domains\" }" >> /etc/ufdbguard.origin/ufdbGuard_categories.conf
+    echo "category \"${table}\" {" >> /etc/ufdbguard.origin/ufdbGuard_categories.conf
+    echo "    domainlist \"${table}/domains\"" >> /etc/ufdbguard.origin/ufdbGuard_categories.conf
+    [ -s ${UFDB_BL_DIR}/${table}/expressions ] && echo "    expressionlist \"${table}/expressions\"" >> /etc/ufdbguard.origin/ufdbGuard_categories.conf
+    [ -s ${UFDB_BL_DIR}/${table}/very_restrictive_expression ] && echo "    expressionlist \"${table}/very_restrictive_expression\"" >> /etc/ufdbguard.origin/ufdbGuard_categories.conf
+    echo "}" >> /etc/ufdbguard.origin/ufdbGuard_categories.conf
 done
 
 # Merge ufdbGuard configuration file
@@ -41,7 +44,8 @@ then
 fi
 
 mkdir -p ${UFDB_DIR}/logs
-chown ufdb:ufdb ${UFDB_DIR}/logs
+#chmod -R 666 ${UFDB_DIR}/logs
+chown -R ufdb:ufdb ${UFDB_DIR}/logs
 
 # Start service ufdbguard
 /etc/init.d/ufdbguard start
