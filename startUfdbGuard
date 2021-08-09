@@ -50,8 +50,8 @@ mkdir -p ${UFDB_DIR}/logs
 chown -R ufdb:ufdb ${UFDB_DIR}/logs
 
 # Start service ufdbguard
-rm /tmp/ufdbguardd-*
 /etc/init.d/ufdbguard start
+/etc/init.d/ufdbguard force-reload
 
 # run original squid start script
 exec /sbin/entrypoint.sh
